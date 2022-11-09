@@ -1,12 +1,7 @@
 <template>
   <v-container class="container" fill-height>
     <v-row class="text-center" justify="center">
-      <v-col
-        cols="12"
-        sm="5"
-        md="5"
-        lg="3"
-      >
+      <v-col cols="12" sm="5" md="5" lg="4">
         <v-card elevation="3" outlined style="padding: 20px">
           <v-img
             :src="require('../assets/logo.svg')"
@@ -35,7 +30,7 @@
               <validation-provider
                 v-slot="{ errors }"
                 name="Password"
-                rules="required|max:12"
+                rules="required|min:4|max:12"
               >
                 <v-text-field
                   v-model="password"
@@ -56,18 +51,14 @@
                 class="mb-5"
               ></v-checkbox>
 
-              <v-btn
-                color="primary"
-                depressed
-                elevation="2"
-                type="submit"
-              >
+              <v-btn color="primary" depressed elevation="2" type="submit">
                 Login
               </v-btn>
             </form>
           </validation-observer>
+
           <v-main style="padding-top: 15px">
-            <router-link to="/register"> Sign Up </router-link>
+            <router-link to="/register"> Register account </router-link>
           </v-main>
         </v-card>
       </v-col>
@@ -77,39 +68,51 @@
 
 
 <script>
-import { required, digits, email, max, regex } from "vee-validate/dist/rules";
+import {
+  required,
+  digits,
+  email,
+  min,
+  max,
+  regex,
+} from "vee-validate/dist/rules";
 import {
   extend,
   ValidationObserver,
   ValidationProvider,
   setInteractionMode,
 } from "vee-validate";
-import axios from "axios";
+// import axios from "axios";
 import { RouteEnum } from "../router/routeEnum";
 import { useToastr } from "./toastr";
-
+import { APIService } from "../services";
 const toastr = useToastr();
 
 setInteractionMode("eager");
 
 extend("password", {
   ...digits,
-  message: "{field} needs to be {length} digits. ({value})",
+  message: "{_field_} needs to be {length} digits. ({_value_})",
 });
 
 extend("required", {
   ...required,
-  message: "{field} can not be empty",
+  message: "{_field_} can not be empty",
+});
+
+extend("min", {
+  ...min,
+  message: "{_field_} should be greater than {length} characters",
 });
 
 extend("max", {
   ...max,
-  message: "{field} may not be greater than {length} characters",
+  message: "{_field_} may not be greater than {length} characters",
 });
 
 extend("regex", {
   ...regex,
-  message: "{field} {value} does not match {regex}",
+  message: "{_field_} {_value_} does not match {regex}",
 });
 
 extend("email", {
@@ -118,13 +121,12 @@ extend("email", {
 });
 
 export default {
-    name:"LoginPage",
   components: {
     ValidationProvider,
     ValidationObserver,
   },
+  name: "LoginPage",
   data: () => ({
-    name: "",
     email: "",
     password: "",
     checkbox: true,
@@ -135,16 +137,18 @@ export default {
       this.$refs.observer.validate();
       try {
         const payload = {
-          email: this.email,
-          password: this.password,
+          "email": this.email,
+          "password": this.password,
         };
-        const result = await axios.post(
-          "http://restapi.adequateshop.com/api/authaccount/login",
-          payload,
-        );
-        if(result.data.code === 1) return toastr.error(result.data.message);
-        toastr.success(result.data.message);
+        // Axios Post Request
+        // const result = await axios.post(
+        //   "http://restapi.adequateshop.com/api/authaccount/login",
+        //   payload,
+        // );
+        const result = await APIService.rawPost("/authaccount/login", payload);
         console.log(result);
+        if (result.data.code === 1) return toastr.error(result.data.message);
+        toastr.success(result.data.message);
         this.$router.push(RouteEnum.HOME);
       } catch (err) {
         console.log(err);
@@ -153,3 +157,6 @@ export default {
   },
 };
 </script>
+
+// email: test122333@gmail.com
+// password: 123456

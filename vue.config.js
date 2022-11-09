@@ -1,6 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
-module.exports = {
-  devServer: {
-    proxy: 'http://api.back.end',
-  }
-}
+module.exports = defineConfig({
+  transpileDependencies: [
+    'vuetify'
+  ]
+})
+module.exports = { devServer: { proxy: 'http://restapi.adequateshop.com/api/'}};
