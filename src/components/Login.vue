@@ -30,26 +30,17 @@
               <validation-provider
                 v-slot="{ errors }"
                 name="Password"
-                rules="required|min:4|max:12"
+                rules="required|min:6|max:12"
               >
                 <v-text-field
                   v-model="password"
                   :counter="12"
                   :error-messages="errors"
                   label="Password"
+                  type="password"
                   required
                 ></v-text-field>
               </validation-provider>
-              <!-- Checkbox -->
-              <v-checkbox
-                v-model="checkbox"
-                label="Keep me signed in"
-                color="dark"
-                value="dark"
-                hide-details
-                style="font-weight: bold"
-                class="mb-5"
-              ></v-checkbox>
 
               <v-btn color="primary" depressed elevation="2" type="submit">
                 Login
@@ -86,6 +77,7 @@ import {
 import { RouteEnum } from "../router/routeEnum";
 import { useToastr } from "./toastr";
 import { APIService } from "../services";
+
 const toastr = useToastr();
 
 setInteractionMode("eager");
@@ -137,17 +129,15 @@ export default {
       this.$refs.observer.validate();
       try {
         const payload = {
-          "email": this.email,
-          "password": this.password,
+          email: this.email,
+          password: this.password,
         };
-        // Axios Post Request
-        // const result = await axios.post(
-        //   "http://restapi.adequateshop.com/api/authaccount/login",
-        //   payload,
-        // );
         const result = await APIService.rawPost("/authaccount/login", payload);
         console.log(result);
         if (result.data.code === 1) return toastr.error(result.data.message);
+        // Set local storage... 
+        localStorage.setItem("user",  JSON.stringify(result.data.data));
+
         toastr.success(result.data.message);
         this.$router.push(RouteEnum.HOME);
       } catch (err) {
